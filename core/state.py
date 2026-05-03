@@ -17,6 +17,7 @@ class CircleState:
 @dataclass
 class CollimationState:
     """Holds the current state of the application's overlays and settings."""
+    APP_VERSION: str = "v0.1.0"
     crosshair_visible: bool = True
     crosshair_offset_x: int = 0
     crosshair_offset_y: int = 0

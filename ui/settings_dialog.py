@@ -102,7 +102,7 @@ class GlobalSettingsDialog(QDialog):
             "<center>"
             "<img src='assets/logos/logo.svg' width='80' height='80'><br><br>"
             "<h2 style='color: #00E5FF; margin: 0;'>StellAlign</h2>"
-            "<p style='color: #aaaaaa; margin: 0;'>v1.0.0</p><br>"
+            f"<p style='color: #aaaaaa; margin: 0;'>{self.state.APP_VERSION}</p><br>"
             "<p>Precision collimation tools for reflector telescopes.</p>"
             "<p>Open-source and designed for astrophotographers.</p>"
             "</center>"
