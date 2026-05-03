@@ -31,6 +31,7 @@ StellAlign is an open-source, Python-based desktop application for collimating r
 *   Create a build script or workflow for packaging the application on Linux (AppImage or `.tar.gz`).
 *   Implement a computer-vision powered Collimation Aid (Comet Tail, error HUD) to auto-detect reflections and guide real-time mechanical adjustments.
 *   ASCOM integration for non-ZWO cameras
+*   Create night mode icons
 
 **Key Features**
 1.  **The Anchor Workflow:** A "True Center" calibration system. Circles can "Set the Anchor" (moving the main crosshair) or "Snap to Anchor" to ensure perfect optical concentricity.

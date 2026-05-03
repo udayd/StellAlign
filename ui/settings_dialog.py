@@ -3,6 +3,7 @@ from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
 from PyQt6.QtCore import Qt, QUrl
 from PyQt6.QtGui import QDesktopServices
 from core.state import CollimationState
+from ui.widgets.components import create_button
 
 class GlobalSettingsDialog(QDialog):
     def __init__(self, state: CollimationState, parent=None):
@@ -40,7 +41,7 @@ class GlobalSettingsDialog(QDialog):
         self.input_zwo_path.setPlaceholderText("Path to ASICamera2.dll or libASICamera2.so")
         self.input_zwo_path.textChanged.connect(self.on_zwo_path_changed)
         
-        self.btn_browse_zwo = QPushButton("Browse...")
+        self.btn_browse_zwo = create_button(variant='default', text="Browse...")
         self.btn_browse_zwo.clicked.connect(self.browse_zwo_sdk)
         
         self.zwo_path_layout = QHBoxLayout()
@@ -132,7 +133,7 @@ class GlobalSettingsDialog(QDialog):
         about_content.setAlignment(Qt.AlignmentFlag.AlignCenter)
         about_layout.addWidget(about_content)
         
-        self.btn_check_updates = QPushButton("Check for Updates")
+        self.btn_check_updates = create_button(variant='default', text="Check for Updates")
         self.btn_check_updates.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_check_updates.clicked.connect(self.check_for_updates)
         about_layout.addWidget(self.btn_check_updates, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -141,7 +142,7 @@ class GlobalSettingsDialog(QDialog):
         
         main_layout.addWidget(self.tabs)
         
-        btn_close = QPushButton("Done")
+        btn_close = create_button(variant='default', text="Done")
         btn_close.clicked.connect(self.accept)
         main_layout.addWidget(btn_close, alignment=Qt.AlignmentFlag.AlignRight)
 
