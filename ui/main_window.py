@@ -1,8 +1,8 @@
 import cv2
 from datetime import datetime
-from PyQt6.QtWidgets import QMainWindow, QHBoxLayout, QGridLayout, QWidget, QPushButton, QLabel, QSplitter
-from PyQt6.QtCore import Qt, QRect
-from PyQt6.QtGui import QIcon, QImage, QPainter, QFont, QColor
+from PyQt6.QtWidgets import QMainWindow, QHBoxLayout, QGridLayout, QWidget, QPushButton, QLabel, QSplitter, QMessageBox
+from PyQt6.QtCore import Qt, QRect, QUrl
+from PyQt6.QtGui import QIcon, QImage, QPainter, QFont, QColor, QDesktopServices
 from ui.video_widget import VideoWidget
 from ui.control_panel import ControlPanel
 from ui.hud import CameraHUD
@@ -11,6 +11,7 @@ from core.state import CollimationState
 from core.workspace import WorkspaceManager
 from ui.styles import LOADING_OVERLAY
 from core.profiles import ProfileManager
+from core.updater import UpdateChecker
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -77,6 +78,22 @@ class MainWindow(QMainWindow):
         self.camera_thread.connection_started.connect(self.show_loading)
         self.camera_thread.connection_failed.connect(self.show_connection_error)
         self.camera_thread.start()
+        
+        # Launch background update checker if enabled
+        if self.state.auto_check_updates:
+            self.update_checker = UpdateChecker(self.state.APP_VERSION)
+            self.update_checker.update_available.connect(self.prompt_update)
+            self.update_checker.start()
+
+    def prompt_update(self, version, url):
+        reply = QMessageBox.information(
+            self, 
+            "Update Available", 
+            f"A new version of StellAlign ({version}) is available!\n\nWould you like to download it now?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        if reply == QMessageBox.StandardButton.Yes:
+            QDesktopServices.openUrl(QUrl(url))
 
     def on_frame_received(self, frame):
         if not self.loading_overlay.isHidden():
