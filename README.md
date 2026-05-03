@@ -2,6 +2,10 @@
 
 A precision collimation assistant for reflector telescopes using USB cameras. Open-source and designed for astrophotographers.
 
+## Downlaods
+
+Check here for the latest build: https://github.com/udayd/StellAlign/tags
+
 ## Installation
 
 1. Clone this repository.
