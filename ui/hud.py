@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
 from core.state import CollimationState
+from ui.widgets.components import create_button
 
 class CameraHUD(QWidget):
     def __init__(self, state: CollimationState, parent=None):
@@ -36,10 +37,8 @@ class CameraHUD(QWidget):
         lbl_title = QLabel("Camera Controls")
         lbl_title.setStyleSheet("font-weight: bold; background: transparent;")
         
-        self.btn_minimize = QPushButton()
-        self.btn_minimize.setIcon(QIcon('assets/icons/chevron-down.svg'))
-        self.btn_minimize.setFixedSize(24, 24)
-        self.btn_minimize.setStyleSheet("background: transparent; border: none;")
+        self.btn_minimize = create_button(variant='icon_round', icon_name='chevron-down')
+        self.btn_minimize.setStyleSheet("border-radius: 16px; background: transparent; border: none;")
         self.btn_minimize.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_minimize.clicked.connect(self.toggle_minimize)
         
@@ -74,25 +73,19 @@ class CameraHUD(QWidget):
         self.slider_noise = QSlider(Qt.Orientation.Horizontal); self.slider_noise.setRange(1, 10); self.slider_noise.setValue(self.state.frame_averaging); self.slider_noise.valueChanged.connect(self.on_frame_averaging_changed)
         self.slider_focus = QSlider(Qt.Orientation.Horizontal); self.slider_focus.setRange(0, 255); self.slider_focus.setValue(self.state.focus); self.slider_focus.valueChanged.connect(self.on_focus_changed)
         
-        self.btn_auto_exp = QPushButton("A")
-        self.btn_auto_exp.setCheckable(True)
+        self.btn_auto_exp = create_button(variant='icon_round', text="A", checkable=True)
         self.btn_auto_exp.setChecked(self.state.auto_exposure)
-        self.btn_auto_exp.setFixedSize(24, 24)
-        self.btn_auto_exp.setStyleSheet("QPushButton { border-radius: 12px; } QPushButton:checked { background-color: #2e7d32; font-weight: bold; color: white; border-radius: 12px; }")
+        self.btn_auto_exp.setStyleSheet("QPushButton { border-radius: 16px; } QPushButton:checked { background-color: #2e7d32; font-weight: bold; color: white; border-radius: 16px; }")
         self.btn_auto_exp.toggled.connect(self.on_auto_exp_toggled)
         
-        self.btn_auto_gain = QPushButton("A")
-        self.btn_auto_gain.setCheckable(True)
+        self.btn_auto_gain = create_button(variant='icon_round', text="A", checkable=True)
         self.btn_auto_gain.setChecked(self.state.auto_gain)
-        self.btn_auto_gain.setFixedSize(24, 24)
-        self.btn_auto_gain.setStyleSheet("QPushButton { border-radius: 12px; } QPushButton:checked { background-color: #2e7d32; font-weight: bold; color: white; border-radius: 12px; }")
+        self.btn_auto_gain.setStyleSheet("QPushButton { border-radius: 16px; } QPushButton:checked { background-color: #2e7d32; font-weight: bold; color: white; border-radius: 16px; }")
         self.btn_auto_gain.toggled.connect(self.on_auto_gain_toggled)
         
-        self.btn_auto_focus = QPushButton("A")
-        self.btn_auto_focus.setCheckable(True)
+        self.btn_auto_focus = create_button(variant='icon_round', text="A", checkable=True)
         self.btn_auto_focus.setChecked(self.state.auto_focus)
-        self.btn_auto_focus.setFixedSize(24, 24)
-        self.btn_auto_focus.setStyleSheet("QPushButton { border-radius: 12px; } QPushButton:checked { background-color: #2e7d32; font-weight: bold; color: white; border-radius: 12px; }")
+        self.btn_auto_focus.setStyleSheet("QPushButton { border-radius: 16px; } QPushButton:checked { background-color: #2e7d32; font-weight: bold; color: white; border-radius: 16px; }")
         self.btn_auto_focus.toggled.connect(self.on_auto_focus_toggled)
         
         exp_layout.addRow("Exposure:", self._create_slider_row(self.slider_exposure, 'minus', 'plus', True, self.btn_auto_exp))
@@ -104,7 +97,7 @@ class CameraHUD(QWidget):
         exp_layout.addRow("Saturation:", self._create_slider_row(self.slider_saturation, 'minus', 'plus', True))
         exp_layout.addRow("Noise Red.:", self._create_slider_row(self.slider_noise, 'minus', 'plus', True))
         
-        btn_reset_defaults = QPushButton("Reset Defaults")
+        btn_reset_defaults = create_button(variant='default', text="Reset Defaults")
         btn_reset_defaults.clicked.connect(self.reset_exposure_defaults)
         exp_layout.addRow("", btn_reset_defaults)
         
@@ -146,7 +139,7 @@ class CameraHUD(QWidget):
         self.row_edge_thresh.setEnabled(self.state.edge_detection)
         self.row_edge_thick.setEnabled(self.state.edge_detection)
         
-        btn_reset_view = QPushButton("Reset Zoom & Pan")
+        btn_reset_view = create_button(variant='default', text="Reset Zoom & Pan")
         btn_reset_view.clicked.connect(self.reset_zoom_pan)
         img_layout.addRow("", btn_reset_view)
         self.stack.addWidget(tab_img)
@@ -180,19 +173,13 @@ class CameraHUD(QWidget):
         if auto_toggle:
             row.addWidget(auto_toggle)
             
-        btn_dec = QPushButton()
-        btn_dec.setIcon(QIcon(f'assets/icons/{dec_icon}.svg'))
-        btn_dec.setFixedSize(24, 24)
-        btn_dec.setAutoRepeat(True)
+        btn_dec = create_button(variant='icon_round', icon_name=dec_icon, auto_repeat=True)
         btn_dec.clicked.connect(lambda checked, s=slider, st=-1: s.setValue(s.value() + st))
         row.addWidget(btn_dec)
         
         row.addWidget(slider)
         
-        btn_inc = QPushButton()
-        btn_inc.setIcon(QIcon(f'assets/icons/{inc_icon}.svg'))
-        btn_inc.setFixedSize(24, 24)
-        btn_inc.setAutoRepeat(True)
+        btn_inc = create_button(variant='icon_round', icon_name=inc_icon, auto_repeat=True)
         btn_inc.clicked.connect(lambda checked, s=slider, st=1: s.setValue(s.value() + st))
         row.addWidget(btn_inc)
         

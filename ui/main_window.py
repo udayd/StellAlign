@@ -12,6 +12,7 @@ from core.workspace import WorkspaceManager
 from ui.styles import LOADING_OVERLAY
 from core.profiles import ProfileManager
 from core.updater import UpdateChecker
+from ui.widgets.components import create_button
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -58,9 +59,8 @@ class MainWindow(QMainWindow):
         self.loading_overlay.hide()
         video_layout.addWidget(self.loading_overlay, 0, 0, Qt.AlignmentFlag.AlignCenter)
         
-        self.btn_fullscreen = QPushButton()
-        self.btn_fullscreen.setIcon(QIcon('assets/icons/expand.svg'))
-        self.btn_fullscreen.setStyleSheet("background: rgba(30, 30, 30, 150); border: none; border-radius: 20px; padding: 8px; margin: 12px;")
+        self.btn_fullscreen = create_button(variant='icon_round', icon_name='expand')
+        self.btn_fullscreen.setStyleSheet("background: rgba(30, 30, 30, 150); border: none; border-radius: 16px; margin: 12px;")
         self.btn_fullscreen.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_fullscreen.clicked.connect(self.toggle_fullscreen)
         video_layout.addWidget(self.btn_fullscreen, 0, 0, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight)

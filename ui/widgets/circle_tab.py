@@ -1,8 +1,9 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QFormLayout, QSlider, QComboBox, QMessageBox
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QFormLayout, QSlider, QComboBox, QMessageBox, QButtonGroup
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QIcon
 from ui.styles import get_visibility_icon, ROW_SPACING
 from ui.widgets.color_picker import InlineColorPicker
+from ui.widgets.components import create_button
 
 class CircleTabWidget(QWidget):
     """A dynamic tab containing the settings for a single circle."""
@@ -16,40 +17,33 @@ class CircleTabWidget(QWidget):
         circle_main_layout = QVBoxLayout(self)
         circle_header = QHBoxLayout()
         
-        self.btn_vis = QPushButton()
-        self.btn_vis.setCheckable(True)
+        self.btn_vis = create_button(
+            variant='icon_round', 
+            tooltip=f"Toggle {self.circle.name} Visibility", 
+            checkable=True
+        )
         self.btn_vis.setChecked(self.circle.visible)
-        self.btn_vis.setToolTip(f"Toggle {self.circle.name} Visibility")
         self.btn_vis.toggled.connect(self.on_vis_toggled)
         self.panel._update_visibility_button(self.btn_vis, self.circle.visible)
         
-        self.btn_anchor = QPushButton()
-        self.btn_anchor.setIcon(QIcon('assets/icons/crosshairs.svg'))
-        self.btn_anchor.setToolTip("Set as Anchor (Move Main Crosshair Here)")
+        self.btn_anchor = create_button(variant='icon_round', icon_name='crosshairs', tooltip="Set as Anchor (Move Main Crosshair Here)")
         self.btn_anchor.clicked.connect(self.on_set_anchor)
         
-        self.btn_snap = QPushButton()
-        self.btn_snap.setIcon(QIcon('assets/icons/magnet.svg'))
-        self.btn_snap.setToolTip("Snap to Anchor (Move this Circle to Main Crosshair)")
+        self.btn_snap = create_button(variant='icon_round', icon_name='magnet', tooltip="Snap to Anchor (Move this Circle to Main Crosshair)")
         self.btn_snap.clicked.connect(self.on_snap_anchor)
         
-        self.btn_center = QPushButton()
-        self.btn_center.setIcon(QIcon('assets/icons/center-mark.svg'))
-        self.btn_center.setToolTip("Toggle Center Mark")
-        self.btn_center.setCheckable(True)
+        self.btn_center = create_button(variant='icon_round', icon_name='center-mark', tooltip="Toggle Center Mark", checkable=True)
         self.btn_center.setChecked(self.circle.center_mark_visible)
         self.btn_center.toggled.connect(self.on_center_toggled)
         
-        self.btn_delete = QPushButton()
-        self.btn_delete.setIcon(QIcon('assets/icons/trash.svg'))
-        self.btn_delete.setToolTip("Delete this Circle")
+        self.btn_delete = create_button(variant='icon_round', icon_name='trash', tooltip="Delete this Circle")
         self.btn_delete.clicked.connect(self.on_delete)
         
         circle_header.addWidget(self.btn_vis)
-        circle_header.addStretch()
         circle_header.addWidget(self.btn_anchor)
         circle_header.addWidget(self.btn_snap)
         circle_header.addWidget(self.btn_center)
+        circle_header.addStretch()
         circle_header.addWidget(self.btn_delete)
         circle_main_layout.addLayout(circle_header)
         
@@ -76,10 +70,34 @@ class CircleTabWidget(QWidget):
         self.slider_thickness.setValue(self.circle.thickness)
         self.slider_thickness.valueChanged.connect(self.on_thickness_changed)
         
-        self.combo_style = QComboBox()
-        self.combo_style.addItems(["Solid", "Dashed", "Dotted"])
-        self.combo_style.setCurrentText(self.circle.line_style)
-        self.combo_style.currentTextChanged.connect(self.on_style_changed)
+        # Create Style buttons
+        self.style_button_group = QButtonGroup(self)
+        self.style_button_group.setExclusive(True)
+        
+        style_widget = QWidget()
+        style_layout = QHBoxLayout(style_widget)
+        style_layout.setContentsMargins(0, 0, 0, 0)
+        style_layout.setSpacing(4)
+        
+        self.btn_solid = create_button(variant='default', icon_name='solid', tooltip="Solid Line", checkable=True)
+        self.btn_solid.clicked.connect(lambda: self.on_style_changed("Solid"))
+        self.btn_dashed = create_button(variant='default', icon_name='dashed', tooltip="Dashed Line", checkable=True)
+        self.btn_dashed.clicked.connect(lambda: self.on_style_changed("Dashed"))
+        self.btn_dotted = create_button(variant='default', icon_name='dotted', tooltip="Dotted Line", checkable=True)
+        self.btn_dotted.clicked.connect(lambda: self.on_style_changed("Dotted"))
+        
+        self.style_button_group.addButton(self.btn_solid)
+        self.style_button_group.addButton(self.btn_dashed)
+        self.style_button_group.addButton(self.btn_dotted)
+        
+        style_layout.addWidget(self.btn_solid)
+        style_layout.addWidget(self.btn_dashed)
+        style_layout.addWidget(self.btn_dotted)
+        style_layout.addStretch()
+
+        if self.circle.line_style == "Solid": self.btn_solid.setChecked(True)
+        elif self.circle.line_style == "Dashed": self.btn_dashed.setChecked(True)
+        else: self.btn_dotted.setChecked(True)
         
         self.palette_color = InlineColorPicker(self.circle.color, self.on_color_changed)
         
@@ -97,9 +115,11 @@ class CircleTabWidget(QWidget):
         circle_layout.addRow("Radius:", self.panel._create_slider_row(self.slider_radius, 'minus', 'plus'))
         circle_layout.addRow("Offset X:", self.panel._create_slider_row(self.slider_offset_x, 'chevron-left', 'chevron-right'))
         circle_layout.addRow("Offset Y:", self.panel._create_slider_row(self.slider_offset_y, 'chevron-up', 'chevron-down'))
+        circle_layout.addRow(self.panel._create_divider())
         circle_layout.addRow("Thickness:", self.panel._create_slider_row(self.slider_thickness, 'minus', 'plus'))
-        circle_layout.addRow("Style:", self.combo_style)
+        circle_layout.addRow("Style:", style_widget)
         circle_layout.addRow("Color:", self.palette_color)
+        circle_layout.addRow(self.panel._create_divider())
         circle_layout.addRow("Mask Mode:", self.combo_mask)
         circle_layout.addRow("Mask Opacity:", self.panel._create_slider_row(self.slider_mask_opacity, 'minus', 'plus'))
         
