@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+    <!-- Dynamic, kinetic tube body angled at ~30 degrees to the right -->
+    <path d="M 120 120 C 250 80, 420 250, 400 420 C 250 350, 80 250, 120 120 Z" fill="none" stroke="#00E5FF" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" />
+    
+    <!-- Expressive, warped elliptical aperture pointing towards the viewer -->
+    <path d="M 60 220 C 40 80, 280 40, 320 180 C 350 320, 80 380, 60 220 Z" fill="none" stroke="#FF007F" stroke-width="22" stroke-linecap="round" />
+    
+    <!-- Slashing spider vane crosshairs intersecting off-center -->
+    <line x1="20" y1="300" x2="480" y2="100" stroke="#39FF14" stroke-width="28" stroke-linecap="round" />
+    <line x1="160" y1="20" x2="320" y2="480" stroke="#39FF14" stroke-width="28" stroke-linecap="round" />
+    
+    <!-- Deep primary mirror reflection swoop -->
+    <path d="M 160 260 Q 220 340 280 220" fill="none" stroke="#FFFF00" stroke-width="36" stroke-linecap="round" />
+
+    <!-- Expressionist "splatter" energy dots -->
+    <circle cx="440" cy="100" r="36" fill="#00E5FF" />
+    <circle cx="80" cy="420" r="26" fill="#FF007F" />
+    <circle cx="400" cy="300" r="12" fill="#FFFF00" />
+</svg>
