@@ -35,7 +35,7 @@ def main():
     app = QApplication(sys.argv)
     
     # Set the global application icon (Taskbar / Dock)
-    app.setWindowIcon(QIcon('assets/icons/logo.svg'))
+    app.setWindowIcon(QIcon('assets/logos/logo.svg'))
     
     # Initialize and show the main window
     window = MainWindow()

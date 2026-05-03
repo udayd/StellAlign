@@ -18,7 +18,7 @@ class VideoWidget(QLabel):
         pixmap.fill(Qt.GlobalColor.transparent)
         painter = QPainter(pixmap)
         painter.setOpacity(0.1) # 10% opacity for a subtle watermark
-        logo = QIcon("assets/icons/logo.svg").pixmap(size, size)
+        logo = QIcon("assets/logos/logo.svg").pixmap(size, size)
         painter.drawPixmap(0, 0, logo)
         painter.end()
         self.setPixmap(pixmap)
