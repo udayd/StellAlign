@@ -32,10 +32,12 @@ StellAlign is an open-source, Python-based desktop application for collimating r
 *   Implement a computer-vision powered Collimation Aid (Comet Tail, error HUD) to auto-detect reflections and guide real-time mechanical adjustments.
 *   ASCOM integration for non-ZWO cameras
 *   Create night mode icons
+*   Reverse up / down icons so down is on the left side of the slider and up is on the right
 
 **Key Features**
 1.  **The Anchor Workflow:** A "True Center" calibration system. Circles can "Set the Anchor" (moving the main crosshair) or "Snap to Anchor" to ensure perfect optical concentricity.
 2.  **Dynamic Masking:** Inner and Outer masks with adjustable opacity to completely eliminate the "hall of mirrors" distraction in Newtonian reflectors.
 3.  **Guided Assistant:** A telescope-specific wizard that automates the creation, masking, and positioning of circles step-by-step for beginners.
 4.  **Advanced Camera Controls:** Real-time Frame Averaging (Noise reduction), Software Gamma, Digital Zoom/Pan, and Arbitrary Rotation.
+5.  **Edge Detection:** Cleans up the hall of mirrors and displays high contrast edges, allowing you to easily see the edge of each plane.
 5.  **Accessibility First:** Native support for UI scaling (up to 200%), Color-Blind safe palettes, high-contrast text overrides, dashed/dotted line styles, and a deep red Night Vision Mode to preserve dark adaptation.
