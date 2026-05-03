@@ -15,7 +15,7 @@ A precision collimation assistant for reflector telescopes using USB cameras. Op
 To build a standalone Windows executable, ensure you have PyInstaller installed (`pip install pyinstaller`), then run the following command from the root directory:
 
 ```bash
-python -m PyInstaller --noconfirm --onedir --windowed --icon "assets/logos/logo.ico" --name "StellAlign" --add-data "assets/icons;assets/icons" --add-data "assets/logos;assets/logos" main.py
+py -m PyInstaller --noconfirm --onedir --windowed --icon "assets/logos/logo-256x256.ico" --name "StellAlign" --add-data "assets/icons;assets/icons" --add-data "assets/logos;assets/logos" main.py
 ```
 
 Alternatively, Windows users can simply run the included `build.bat` script. The compiled application will be generated inside the `dist/StellAlign/` folder.

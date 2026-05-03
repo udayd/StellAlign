@@ -27,6 +27,8 @@ StellAlign is an open-source, Python-based desktop application for collimating r
 
 **TODOs**
 *   Fix the interactive cursor shapes (pointing-hand vs forbidden) not consistently applying to enabled/disabled PyQt widgets.
+*   Create a build script or workflow for packaging the application on macOS (`.app` / `.dmg`).
+*   Create a build script or workflow for packaging the application on Linux (AppImage or `.tar.gz`).
 
 **Key Features**
 1.  **The Anchor Workflow:** A "True Center" calibration system. Circles can "Set the Anchor" (moving the main crosshair) or "Snap to Anchor" to ensure perfect optical concentricity.
