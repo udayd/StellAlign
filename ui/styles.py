@@ -84,6 +84,10 @@ QPushButton#hud_tab:checked {
 QCheckBox, QCheckBox:hover, QCheckBox::indicator:hover {
     border: 0;
 }
+QFrame#section_divider {
+    border: none;
+    border-bottom: 1px solid #555555;
+}
 """
 
 NIGHT_MODE_STYLESHEET = """
@@ -109,6 +113,10 @@ QWidget#tab_exp, QWidget#tab_img { background-color: rgba(60, 0, 0, 150) !import
 QPushButton#hud_tab { color: #cc5555; }
 QPushButton#hud_tab:hover { color: #ffaaaa; background: rgba(255, 0, 0, 10); }
 QPushButton#hud_tab:checked { color: #ffffff; border-bottom: 2px solid #ff3333; background-color: rgba(60, 0, 0, 150) !important; }
+QFrame#section_divider {
+    border: none;
+    border-bottom: 1px solid #550000;
+}
 """
 
 def apply_application_theme(state):

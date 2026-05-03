@@ -4,6 +4,7 @@ from PyQt6.QtGui import QIcon, QDesktopServices
 from core.workspace import WorkspaceManager
 from core.profiles import ProfileManager
 from ui.styles import ROW_SPACING, SECTION_MARGINS
+from ui.widgets.components import create_button
 
 class WorkspaceWidget(QGroupBox):
     screenshot_requested = pyqtSignal()
@@ -24,34 +25,23 @@ class WorkspaceWidget(QGroupBox):
         self.combo_profiles.currentIndexChanged.connect(self.on_profile_selected)
         profile_row.addWidget(self.combo_profiles)
         
-        self.btn_open_folder = QPushButton()
-        self.btn_open_folder.setIcon(QIcon('assets/icons/folder.svg'))
-        self.btn_open_folder.setToolTip("Open Screenshots Folder")
-        self.btn_open_folder.setFixedSize(28, 28)
+        self.btn_open_folder = create_button(variant='icon_round', icon_name='folder', tooltip="Open Screenshots Folder")
         self.btn_open_folder.clicked.connect(self.on_open_folder)
         profile_row.addWidget(self.btn_open_folder)
         
         toolbar_layout = QHBoxLayout()
         toolbar_layout.setContentsMargins(0, 0, 0, 0)
         
-        self.btn_save = QPushButton()
-        self.btn_save.setIcon(QIcon('assets/icons/plus.svg'))
-        self.btn_save.setToolTip("Save Current Settings as New Profile")
+        self.btn_save = create_button(variant='icon_round', icon_name='plus', tooltip="Save Current Settings as New Profile")
         self.btn_save.clicked.connect(self.on_save_profile)
         
-        self.btn_update = QPushButton()
-        self.btn_update.setIcon(QIcon('assets/icons/save.svg'))
-        self.btn_update.setToolTip("Update Selected Profile")
+        self.btn_update = create_button(variant='icon_round', icon_name='save', tooltip="Update Selected Profile")
         self.btn_update.clicked.connect(self.on_update_profile)
         
-        self.btn_delete = QPushButton()
-        self.btn_delete.setIcon(QIcon('assets/icons/trash.svg'))
-        self.btn_delete.setToolTip("Delete Selected Profile")
+        self.btn_delete = create_button(variant='icon_round', icon_name='trash', tooltip="Delete Selected Profile")
         self.btn_delete.clicked.connect(self.on_delete_profile)
         
-        self.btn_screenshot = QPushButton()
-        self.btn_screenshot.setIcon(QIcon('assets/icons/camera.svg'))
-        self.btn_screenshot.setToolTip("Take Screenshot")
+        self.btn_screenshot = create_button(variant='icon_round', icon_name='camera', tooltip="Take Screenshot")
         self.btn_screenshot.clicked.connect(self.screenshot_requested.emit)
         
         self.refresh_profiles()

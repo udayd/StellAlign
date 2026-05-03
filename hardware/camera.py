@@ -77,18 +77,18 @@ class CameraThread(QThread):
         # Initialize tracking variables for camera properties
         last_res_w = self.state.resolution_width
         last_res_h = self.state.resolution_height
-        last_brightness = self.state.brightness
-        last_contrast = self.state.contrast
         last_exposure = self.state.exposure
+        last_auto_exposure = self.state.auto_exposure
         last_gain = self.state.gain
+        last_auto_gain = self.state.auto_gain
         last_auto_focus = self.state.auto_focus
         last_focus = self.state.focus
         last_use_zwo = self.state.use_zwo_camera
         last_cam_idx = self.state.camera_index
         
         # Set initial hardware values
-        self._apply_hardware_settings(last_res_w, last_res_h, last_brightness, last_contrast, 
-                                      last_exposure, last_gain, last_auto_focus, last_focus)
+        self._apply_hardware_settings(last_res_w, last_res_h, last_exposure, last_auto_exposure, 
+                                      last_gain, last_auto_gain, last_auto_focus, last_focus)
         
         while self._is_running:
             loop_start = time.time()
@@ -109,26 +109,26 @@ class CameraThread(QThread):
                 
             if needs_reconnect:
                 self._connect()
-                self._apply_hardware_settings(last_res_w, last_res_h, last_brightness, last_contrast, 
-                                              last_exposure, last_gain, last_auto_focus, last_focus)
+                self._apply_hardware_settings(last_res_w, last_res_h, last_exposure, last_auto_exposure, 
+                                              last_gain, last_auto_gain, last_auto_focus, last_focus)
 
             # Update hardware if state has changed
-            if self.state.brightness != last_brightness or \
-               self.state.contrast != last_contrast or \
-               self.state.exposure != last_exposure or \
+            if self.state.exposure != last_exposure or \
+               self.state.auto_exposure != last_auto_exposure or \
                self.state.gain != last_gain or \
+               self.state.auto_gain != last_auto_gain or \
                self.state.auto_focus != last_auto_focus or \
                self.state.focus != last_focus:
                
-                last_brightness = self.state.brightness
-                last_contrast = self.state.contrast
                 last_exposure = self.state.exposure
+                last_auto_exposure = self.state.auto_exposure
                 last_gain = self.state.gain
+                last_auto_gain = self.state.auto_gain
                 last_auto_focus = self.state.auto_focus
                 last_focus = self.state.focus
                 
-                self._apply_hardware_settings(last_res_w, last_res_h, last_brightness, last_contrast, 
-                                              last_exposure, last_gain, last_auto_focus, last_focus)
+                self._apply_hardware_settings(last_res_w, last_res_h, last_exposure, last_auto_exposure, 
+                                              last_gain, last_auto_gain, last_auto_focus, last_focus)
 
             ret, frame = False, None
             if self.using_zwo and self.zwo_cam:
@@ -169,7 +169,7 @@ class CameraThread(QThread):
             self.zwo_cam.stop_video_capture()
             self.zwo_cam.close()
 
-    def _apply_hardware_settings(self, res_w, res_h, brightness, contrast, exposure, gain, auto_focus, focus):
+    def _apply_hardware_settings(self, res_w, res_h, exposure, auto_exposure, gain, auto_gain, auto_focus, focus):
         if self.using_zwo and self.zwo_cam:
             try:
                 import zwoasi as asi
@@ -178,24 +178,31 @@ class CameraThread(QThread):
                 if 'Exposure' in controls:
                     # Map UI exposure (-15 to 0) to ZWO microseconds (1ms to 1s)
                     exp_us = int(10 ** ((exposure + 15) / 15.0 * 3.0 + 3.0))
-                    self.zwo_cam.set_control_value(asi.ASI_EXPOSURE, exp_us)
+                    self.zwo_cam.set_control_value(asi.ASI_EXPOSURE, exp_us, auto=auto_exposure)
                     
                 if 'Gain' in controls:
                     # Map UI gain to Max ZWO Gain limits automatically
                     zwo_max_gain = controls['Gain']['MaxValue']
                     zwo_gain = int((gain / 255.0) * zwo_max_gain)
-                    self.zwo_cam.set_control_value(asi.ASI_GAIN, zwo_gain)
+                    self.zwo_cam.set_control_value(asi.ASI_GAIN, zwo_gain, auto=auto_gain)
             except Exception as e:
                 print(f"Error setting ZWO properties: {e}")
         elif not self.using_zwo and self.cap:
             self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, res_w)
             self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, res_h)
-            self.cap.set(cv2.CAP_PROP_BRIGHTNESS, brightness)
-            self.cap.set(cv2.CAP_PROP_CONTRAST, contrast)
-            self.cap.set(cv2.CAP_PROP_EXPOSURE, exposure)
+            
+            # Set auto exposure mode. Only set manual value if auto is off.
+            self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 3 if auto_exposure else 1)
+            if not auto_exposure:
+                self.cap.set(cv2.CAP_PROP_EXPOSURE, exposure)
+            
+            # UVC has no standard auto gain, so it's always manual.
             self.cap.set(cv2.CAP_PROP_GAIN, 255 - gain)
+            
+            # Set auto focus mode. Only set manual value if auto is off.
             self.cap.set(cv2.CAP_PROP_AUTOFOCUS, 1 if auto_focus else 0)
-            self.cap.set(cv2.CAP_PROP_FOCUS, focus)
+            if not auto_focus:
+                self.cap.set(cv2.CAP_PROP_FOCUS, focus)
 
     def stop(self):
         self._is_running = False

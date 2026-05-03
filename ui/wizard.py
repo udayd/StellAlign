@@ -2,6 +2,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButt
 from PyQt6.QtCore import Qt
 from core.state import CollimationState, CircleState
 from ui.styles import ROW_SPACING
+from ui.widgets.components import create_button
 
 class GuidedWizard(QWidget):
     def __init__(self, state: CollimationState, panel):
@@ -20,18 +21,18 @@ class GuidedWizard(QWidget):
         self.combo_scope = QComboBox()
         self.combo_scope.addItems(["Newtonian", "SCT / Mak"])
         self.setup_layout.addWidget(self.combo_scope)
-        self.btn_start = QPushButton("Start Assistant")
+        self.btn_start = create_button(variant='default', text="Start Assistant")
         self.btn_start.clicked.connect(self.start_wizard)
         self.setup_layout.addWidget(self.btn_start)
         
         # Wizard Navigation
         self.nav_layout = QHBoxLayout()
-        self.btn_back = QPushButton("< Back")
+        self.btn_back = create_button(variant='default', text="< Back")
         self.btn_back.clicked.connect(self.prev_step)
         self.lbl_step = QLabel("Step 1/4")
         self.lbl_step.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.lbl_step.setStyleSheet("font-weight: bold; color: #4CAF50;")
-        self.btn_next = QPushButton("Next >")
+        self.btn_next = create_button(variant='default', text="Next >")
         self.btn_next.clicked.connect(self.next_step)
         
         self.nav_layout.addWidget(self.btn_back)

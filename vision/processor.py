@@ -78,6 +78,21 @@ class FrameProcessor:
         else:
             self.frame_buffer.clear()
             
+        # 0.2 Software Brightness, Contrast, Saturation
+        if self.state.brightness != 128 or self.state.contrast != 128:
+            # Map UI sliders (0-255, default 128) to OpenCV factors
+            brightness = self.state.brightness - 128
+            contrast = 1.0 + (self.state.contrast - 128) / 128.0
+            processed_frame = cv2.convertScaleAbs(processed_frame, alpha=contrast, beta=brightness)
+
+        if self.state.saturation != 128:
+            # Map UI slider (0-255, default 128) to a 0.0-2.0 multiplier
+            saturation = self.state.saturation / 128.0
+            if saturation != 1.0:
+                hsv = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2HSV)
+                hsv[:, :, 1] = np.clip(hsv[:, :, 1] * saturation, 0, 255)
+                processed_frame = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+            
         # 0.5. Software Gamma
         if self.state.gamma != 100:
             if self.state.gamma != self._last_gamma:
