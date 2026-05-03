@@ -100,7 +100,7 @@ class GlobalSettingsDialog(QDialog):
         about_layout = QVBoxLayout(tab_about)
         about_content = QLabel(
             "<center>"
-            "<img src='assets/icons/logo.svg' width='80' height='80'><br><br>"
+            "<img src='assets/logos/logo.svg' width='80' height='80'><br><br>"
             "<h2 style='color: #00E5FF; margin: 0;'>StellAlign</h2>"
             "<p style='color: #aaaaaa; margin: 0;'>v1.0.0</p><br>"
             "<p>Precision collimation tools for reflector telescopes.</p>"

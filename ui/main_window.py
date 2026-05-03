@@ -99,7 +99,7 @@ class MainWindow(QMainWindow):
                 painter.setOpacity(0.3)
                 
                 logo_size = 51
-                logo = QIcon('assets/icons/logo.svg').pixmap(logo_size, logo_size)
+                logo = QIcon('assets/logos/logo.svg').pixmap(logo_size, logo_size)
                 
                 font = QFont("Roboto", 9, QFont.Weight.Bold)
                 painter.setFont(font)
@@ -130,7 +130,7 @@ class MainWindow(QMainWindow):
             self.control_panel.show_notification(f"Saved {filename}")
 
     def show_loading(self, message):
-        content = f"<center><img src='assets/icons/logo.svg' width='128' height='128'><br><br>{message}</center>"
+        content = f"<center><img src='assets/logos/logo.svg' width='128' height='128'><br><br>{message}</center>"
         self.loading_overlay.setText(content)
         self.loading_overlay.setStyleSheet(LOADING_OVERLAY)
         self.loading_overlay.show()
@@ -139,7 +139,7 @@ class MainWindow(QMainWindow):
         self.loading_overlay.hide()
         
     def show_connection_error(self):
-        content = "<center><img src='assets/icons/logo.svg' width='128' height='128'><br><br>Failed to connect. Is the camera plugged in?</center>"
+        content = "<center><img src='assets/logos/logo.svg' width='128' height='128'><br><br>Failed to connect. Is the camera plugged in?</center>"
         self.loading_overlay.setText(content)
         self.loading_overlay.setStyleSheet(LOADING_OVERLAY.replace("rgba(0, 0, 0, 180)", "rgba(180, 0, 0, 180)"))
         self.loading_overlay.show()
