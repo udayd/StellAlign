@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
 from core.state import CollimationState
-from ui.widgets.components import create_button
+from ui.widgets.components import create_button, create_slider_row
 
 class CameraHUD(QWidget):
     def __init__(self, state: CollimationState, parent=None):
@@ -88,14 +88,14 @@ class CameraHUD(QWidget):
         self.btn_auto_focus.setStyleSheet("QPushButton { border-radius: 16px; } QPushButton:checked { background-color: #2e7d32; font-weight: bold; color: white; border-radius: 16px; }")
         self.btn_auto_focus.toggled.connect(self.on_auto_focus_toggled)
         
-        exp_layout.addRow("Exposure:", self._create_slider_row(self.slider_exposure, 'minus', 'plus', True, self.btn_auto_exp))
-        exp_layout.addRow("Gain:", self._create_slider_row(self.slider_gain, 'minus', 'plus', True, self.btn_auto_gain))
-        exp_layout.addRow("Gamma:", self._create_slider_row(self.slider_gamma, 'minus', 'plus', True))
-        exp_layout.addRow("Focus:", self._create_slider_row(self.slider_focus, 'minus', 'plus', True, self.btn_auto_focus))
-        exp_layout.addRow("Contrast:", self._create_slider_row(self.slider_contrast, 'minus', 'plus', True))
-        exp_layout.addRow("Brightness:", self._create_slider_row(self.slider_brightness, 'minus', 'plus', True))
-        exp_layout.addRow("Saturation:", self._create_slider_row(self.slider_saturation, 'minus', 'plus', True))
-        exp_layout.addRow("Noise Red.:", self._create_slider_row(self.slider_noise, 'minus', 'plus', True))
+        exp_layout.addRow("Exposure:", create_slider_row(self.slider_exposure, 'minus', 'plus', True, self.btn_auto_exp))
+        exp_layout.addRow("Gain:", create_slider_row(self.slider_gain, 'minus', 'plus', True, self.btn_auto_gain))
+        exp_layout.addRow("Gamma:", create_slider_row(self.slider_gamma, 'minus', 'plus', True))
+        exp_layout.addRow("Focus:", create_slider_row(self.slider_focus, 'minus', 'plus', True, self.btn_auto_focus))
+        exp_layout.addRow("Contrast:", create_slider_row(self.slider_contrast, 'minus', 'plus', True))
+        exp_layout.addRow("Brightness:", create_slider_row(self.slider_brightness, 'minus', 'plus', True))
+        exp_layout.addRow("Saturation:", create_slider_row(self.slider_saturation, 'minus', 'plus', True))
+        exp_layout.addRow("Noise Red.:", create_slider_row(self.slider_noise, 'minus', 'plus', True))
         
         btn_reset_defaults = create_button(variant='default', text="Reset Defaults")
         btn_reset_defaults.clicked.connect(self.reset_exposure_defaults)
@@ -126,13 +126,13 @@ class CameraHUD(QWidget):
         self.slider_edge_thresh = QSlider(Qt.Orientation.Horizontal); self.slider_edge_thresh.setRange(10, 255); self.slider_edge_thresh.setValue(self.state.edge_threshold); self.slider_edge_thresh.valueChanged.connect(self.on_edge_thresh_changed)
         self.slider_edge_thick = QSlider(Qt.Orientation.Horizontal); self.slider_edge_thick.setRange(1, 10); self.slider_edge_thick.setValue(self.state.edge_thickness); self.slider_edge_thick.valueChanged.connect(self.on_edge_thick_changed)
         
-        self.row_edge_thresh = self._create_slider_row(self.slider_edge_thresh, 'minus', 'plus', True)
-        self.row_edge_thick = self._create_slider_row(self.slider_edge_thick, 'minus', 'plus', True)
+        self.row_edge_thresh = create_slider_row(self.slider_edge_thresh, 'minus', 'plus', True)
+        self.row_edge_thick = create_slider_row(self.slider_edge_thick, 'minus', 'plus', True)
         
         img_layout.addRow(grid)
-        img_layout.addRow("Zoom:", self._create_slider_row(self.slider_zoom, 'zoom-out', 'zoom-in', True))
-        img_layout.addRow("Pan X:", self._create_slider_row(self.slider_pan_x, 'chevron-left', 'chevron-right', True))
-        img_layout.addRow("Pan Y:", self._create_slider_row(self.slider_pan_y, 'chevron-up', 'chevron-down', True))
+        img_layout.addRow("Zoom:", create_slider_row(self.slider_zoom, 'zoom-out', 'zoom-in', True))
+        img_layout.addRow("Pan X:", create_slider_row(self.slider_pan_x, 'chevron-left', 'chevron-right', True))
+        img_layout.addRow("Pan Y:", create_slider_row(self.slider_pan_y, 'chevron-up', 'chevron-down', True))
         img_layout.addRow("Edge Thresh:", self.row_edge_thresh)
         img_layout.addRow("Edge Thick:", self.row_edge_thick)
         
@@ -164,54 +164,6 @@ class CameraHUD(QWidget):
         self.slider_zoom.setValue(100)
         self.slider_pan_x.setValue(0)
         self.slider_pan_y.setValue(0)
-
-    def _create_slider_row(self, slider, dec_icon, inc_icon, show_value=False, auto_toggle=None):
-        widget = QWidget()
-        row = QHBoxLayout(widget)
-        row.setContentsMargins(0, 0, 0, 0)
-        
-        if auto_toggle:
-            row.addWidget(auto_toggle)
-            
-        btn_dec = create_button(variant='icon_round', icon_name=dec_icon, auto_repeat=True)
-        btn_dec.clicked.connect(lambda checked, s=slider, st=-1: s.setValue(s.value() + st))
-        row.addWidget(btn_dec)
-        
-        row.addWidget(slider)
-        
-        btn_inc = create_button(variant='icon_round', icon_name=inc_icon, auto_repeat=True)
-        btn_inc.clicked.connect(lambda checked, s=slider, st=1: s.setValue(s.value() + st))
-        row.addWidget(btn_inc)
-        
-        if show_value:
-            val_label = QLabel(str(slider.value()))
-            val_label.setMinimumWidth(30)
-            val_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            slider.valueChanged.connect(lambda v, l=val_label: l.setText(str(v)))
-            row.addWidget(val_label)
-            
-        def _update_state(*args):
-            is_auto = auto_toggle.isChecked() if auto_toggle else False
-            slider.setEnabled(not is_auto)
-            
-            can_dec = not is_auto and slider.value() > slider.minimum()
-            can_inc = not is_auto and slider.value() < slider.maximum()
-            
-            btn_dec.setEnabled(can_dec)
-            btn_inc.setEnabled(can_inc)
-            
-            dec_suffix = "" if can_dec else "-disabled"
-            inc_suffix = "" if can_inc else "-disabled"
-            
-            btn_dec.setIcon(QIcon(f'assets/icons/{dec_icon}{dec_suffix}.svg'))
-            btn_inc.setIcon(QIcon(f'assets/icons/{inc_icon}{inc_suffix}.svg'))
-            
-        slider.valueChanged.connect(_update_state)
-        if auto_toggle:
-            auto_toggle.toggled.connect(_update_state)
-            
-        _update_state()
-        return widget
 
     def sync_ui_to_state(self):
         self.slider_brightness.setValue(self.state.brightness)

@@ -1,9 +1,9 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QFormLayout, QSlider, QComboBox, QMessageBox, QButtonGroup
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QFormLayout, QSlider, QComboBox, QMessageBox
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QIcon
 from ui.styles import get_visibility_icon, ROW_SPACING
 from ui.widgets.color_picker import InlineColorPicker
-from ui.widgets.components import create_button
+from ui.widgets.components import create_button, create_slider_row, create_divider, LineStyleSelector
 
 class CircleTabWidget(QWidget):
     """A dynamic tab containing the settings for a single circle."""
@@ -70,34 +70,7 @@ class CircleTabWidget(QWidget):
         self.slider_thickness.setValue(self.circle.thickness)
         self.slider_thickness.valueChanged.connect(self.on_thickness_changed)
         
-        # Create Style buttons
-        self.style_button_group = QButtonGroup(self)
-        self.style_button_group.setExclusive(True)
-        
-        style_widget = QWidget()
-        style_layout = QHBoxLayout(style_widget)
-        style_layout.setContentsMargins(0, 0, 0, 0)
-        style_layout.setSpacing(4)
-        
-        self.btn_solid = create_button(variant='default', icon_name='solid', tooltip="Solid Line", checkable=True)
-        self.btn_solid.clicked.connect(lambda: self.on_style_changed("Solid"))
-        self.btn_dashed = create_button(variant='default', icon_name='dashed', tooltip="Dashed Line", checkable=True)
-        self.btn_dashed.clicked.connect(lambda: self.on_style_changed("Dashed"))
-        self.btn_dotted = create_button(variant='default', icon_name='dotted', tooltip="Dotted Line", checkable=True)
-        self.btn_dotted.clicked.connect(lambda: self.on_style_changed("Dotted"))
-        
-        self.style_button_group.addButton(self.btn_solid)
-        self.style_button_group.addButton(self.btn_dashed)
-        self.style_button_group.addButton(self.btn_dotted)
-        
-        style_layout.addWidget(self.btn_solid)
-        style_layout.addWidget(self.btn_dashed)
-        style_layout.addWidget(self.btn_dotted)
-        style_layout.addStretch()
-
-        if self.circle.line_style == "Solid": self.btn_solid.setChecked(True)
-        elif self.circle.line_style == "Dashed": self.btn_dashed.setChecked(True)
-        else: self.btn_dotted.setChecked(True)
+        self.style_selector = LineStyleSelector(self.circle.line_style, self.on_style_changed)
         
         self.palette_color = InlineColorPicker(self.circle.color, self.on_color_changed)
         
@@ -112,16 +85,16 @@ class CircleTabWidget(QWidget):
         self.slider_mask_opacity.setValue(self.circle.mask_opacity)
         self.slider_mask_opacity.valueChanged.connect(self.on_mask_opacity_changed)
         
-        circle_layout.addRow("Radius:", self.panel._create_slider_row(self.slider_radius, 'minus', 'plus'))
-        circle_layout.addRow("Offset X:", self.panel._create_slider_row(self.slider_offset_x, 'chevron-left', 'chevron-right'))
-        circle_layout.addRow("Offset Y:", self.panel._create_slider_row(self.slider_offset_y, 'chevron-up', 'chevron-down'))
-        circle_layout.addRow(self.panel._create_divider())
-        circle_layout.addRow("Thickness:", self.panel._create_slider_row(self.slider_thickness, 'minus', 'plus'))
-        circle_layout.addRow("Style:", style_widget)
+        circle_layout.addRow("Radius:", create_slider_row(self.slider_radius, 'minus', 'plus'))
+        circle_layout.addRow("Offset X:", create_slider_row(self.slider_offset_x, 'chevron-left', 'chevron-right'))
+        circle_layout.addRow("Offset Y:", create_slider_row(self.slider_offset_y, 'chevron-up', 'chevron-down'))
+        circle_layout.addRow(create_divider())
+        circle_layout.addRow("Thickness:", create_slider_row(self.slider_thickness, 'minus', 'plus'))
+        circle_layout.addRow("Style:", self.style_selector)
         circle_layout.addRow("Color:", self.palette_color)
-        circle_layout.addRow(self.panel._create_divider())
+        circle_layout.addRow(create_divider())
         circle_layout.addRow("Mask Mode:", self.combo_mask)
-        circle_layout.addRow("Mask Opacity:", self.panel._create_slider_row(self.slider_mask_opacity, 'minus', 'plus'))
+        circle_layout.addRow("Mask Opacity:", create_slider_row(self.slider_mask_opacity, 'minus', 'plus'))
         
         circle_main_layout.addLayout(circle_layout)
 

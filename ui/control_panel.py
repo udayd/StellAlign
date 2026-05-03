@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QSlider, QFormLayout, QPushButton, QComboBox, QLabel, QTabWidget, QSizePolicy, QMessageBox, QButtonGroup, QFrame
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QSlider, QFormLayout, QPushButton, QComboBox, QLabel, QTabWidget, QSizePolicy, QMessageBox
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
 from core.state import CollimationState, CircleState
@@ -8,7 +8,7 @@ from ui.help_dialog import HelpDialog
 from ui.settings_dialog import GlobalSettingsDialog
 from ui.widgets.color_picker import InlineColorPicker
 from ui.widgets.circle_tab import CircleTabWidget
-from ui.widgets.components import create_button
+from ui.widgets.components import create_button, create_slider_row, create_divider, LineStyleSelector
 from ui.widgets.workspace import WorkspaceWidget
 from ui.widgets.notification import NotificationWidget
 
@@ -115,43 +115,16 @@ class ControlPanel(QWidget):
         self.slider_crosshair_rotation.setValue(self.state.crosshair_rotation)
         self.slider_crosshair_rotation.valueChanged.connect(self.on_crosshair_rotation_changed)
         
-        # Create Style buttons
-        self.style_button_group_crosshair = QButtonGroup(self)
-        self.style_button_group_crosshair.setExclusive(True)
-        
-        style_widget_crosshair = QWidget()
-        style_layout_crosshair = QHBoxLayout(style_widget_crosshair)
-        style_layout_crosshair.setContentsMargins(0,0,0,0)
-        style_layout_crosshair.setSpacing(4)
-        
-        self.btn_solid_crosshair = create_button(variant='default', icon_name='solid', tooltip="Solid Line", checkable=True)
-        self.btn_solid_crosshair.clicked.connect(lambda: self.on_crosshair_style_changed("Solid"))
-        self.btn_dashed_crosshair = create_button(variant='default', icon_name='dashed', tooltip="Dashed Line", checkable=True)
-        self.btn_dashed_crosshair.clicked.connect(lambda: self.on_crosshair_style_changed("Dashed"))
-        self.btn_dotted_crosshair = create_button(variant='default', icon_name='dotted', tooltip="Dotted Line", checkable=True)
-        self.btn_dotted_crosshair.clicked.connect(lambda: self.on_crosshair_style_changed("Dotted"))
-        
-        self.style_button_group_crosshair.addButton(self.btn_solid_crosshair)
-        self.style_button_group_crosshair.addButton(self.btn_dashed_crosshair)
-        self.style_button_group_crosshair.addButton(self.btn_dotted_crosshair)
-        
-        style_layout_crosshair.addWidget(self.btn_solid_crosshair)
-        style_layout_crosshair.addWidget(self.btn_dashed_crosshair)
-        style_layout_crosshair.addWidget(self.btn_dotted_crosshair)
-        style_layout_crosshair.addStretch()
-
-        if self.state.crosshair_line_style == "Solid": self.btn_solid_crosshair.setChecked(True)
-        elif self.state.crosshair_line_style == "Dashed": self.btn_dashed_crosshair.setChecked(True)
-        else: self.btn_dotted_crosshair.setChecked(True)
+        self.style_selector_crosshair = LineStyleSelector(self.state.crosshair_line_style, self.on_crosshair_style_changed)
         
         self.palette_crosshair_color = InlineColorPicker(self.state.crosshair_color, self.on_crosshair_color_changed)
         
-        crosshair_layout.addRow("Offset X:", self._create_slider_row(self.slider_crosshair_offset_x, 'chevron-left', 'chevron-right'))
-        crosshair_layout.addRow("Offset Y:", self._create_slider_row(self.slider_crosshair_offset_y, 'chevron-up', 'chevron-down'))
-        crosshair_layout.addRow("Thickness:", self._create_slider_row(self.slider_crosshair_thickness, 'minus', 'plus'))
-        crosshair_layout.addRow("Rotation:", self._create_slider_row(self.slider_crosshair_rotation, 'undo', 'redo', True))
-        crosshair_layout.addRow(self._create_divider())
-        crosshair_layout.addRow("Style:", style_widget_crosshair)
+        crosshair_layout.addRow("Offset X:", create_slider_row(self.slider_crosshair_offset_x, 'chevron-left', 'chevron-right'))
+        crosshair_layout.addRow("Offset Y:", create_slider_row(self.slider_crosshair_offset_y, 'chevron-up', 'chevron-down'))
+        crosshair_layout.addRow("Thickness:", create_slider_row(self.slider_crosshair_thickness, 'minus', 'plus'))
+        crosshair_layout.addRow("Rotation:", create_slider_row(self.slider_crosshair_rotation, 'undo', 'redo', True))
+        crosshair_layout.addRow(create_divider())
+        crosshair_layout.addRow("Style:", self.style_selector_crosshair)
         crosshair_layout.addRow("Color:", self.palette_crosshair_color)
         
         crosshair_main_layout.addLayout(crosshair_layout)
@@ -184,65 +157,6 @@ class ControlPanel(QWidget):
         self.notification = NotificationWidget()
         layout.addWidget(self.notification)
         
-    def _create_slider_row(self, slider, dec_icon, inc_icon, show_value=False, auto_toggle=None):
-        """Helper method to wrap a slider with decrement and increment buttons."""
-        widget = QWidget()
-        row = QHBoxLayout(widget)
-        row.setContentsMargins(0, 0, 0, 0)
-        
-        if auto_toggle:
-            row.addWidget(auto_toggle)
-            
-        btn_dec = create_button(variant='icon_round', icon_name=dec_icon, auto_repeat=True)
-        btn_dec.clicked.connect(lambda checked, s=slider, st=-1: s.setValue(s.value() + st))
-        row.addWidget(btn_dec)
-        
-        row.addWidget(slider)
-        
-        btn_inc = create_button(variant='icon_round', icon_name=inc_icon, auto_repeat=True)
-        btn_inc.clicked.connect(lambda checked, s=slider, st=1: s.setValue(s.value() + st))
-        row.addWidget(btn_inc)
-        
-        if show_value:
-            val_label = QLabel(str(slider.value()))
-            val_label.setMinimumWidth(30)
-            val_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            slider.valueChanged.connect(lambda v, l=val_label: l.setText(str(v)))
-            row.addWidget(val_label)
-            
-        def _update_state(*args):
-            is_auto = auto_toggle.isChecked() if auto_toggle else False
-            slider.setEnabled(not is_auto)
-            
-            can_dec = not is_auto and slider.value() > slider.minimum()
-            can_inc = not is_auto and slider.value() < slider.maximum()
-            
-            btn_dec.setEnabled(can_dec)
-            btn_inc.setEnabled(can_inc)
-            
-            dec_suffix = "" if can_dec else "-disabled"
-            inc_suffix = "" if can_inc else "-disabled"
-            
-            btn_dec.setIcon(QIcon(f'assets/icons/{dec_icon}{dec_suffix}.svg'))
-            btn_inc.setIcon(QIcon(f'assets/icons/{inc_icon}{inc_suffix}.svg'))
-            
-        slider.valueChanged.connect(_update_state)
-        if auto_toggle:
-            auto_toggle.toggled.connect(_update_state)
-            
-        _update_state()
-        return widget
-
-    def _create_divider(self):
-        container = QWidget()
-        layout = QHBoxLayout(container)
-        layout.setContentsMargins(12, 6, 12, 6) # Left, Top, Right, Bottom padding
-        line = QFrame()
-        line.setObjectName("section_divider")
-        line.setFixedHeight(1)
-        layout.addWidget(line)
-        return container
-
     def _update_visibility_button(self, btn, is_visible):
         btn.setIcon(get_visibility_icon(is_visible, self.state.night_mode))
         btn.setStyleSheet("border-radius: 16px;")
@@ -382,9 +296,7 @@ class ControlPanel(QWidget):
         self.slider_crosshair_rotation.setValue(self.state.crosshair_rotation)
         self.palette_crosshair_color.set_color(self.state.crosshair_color)
         
-        if self.state.crosshair_line_style == "Solid": self.btn_solid_crosshair.setChecked(True)
-        elif self.state.crosshair_line_style == "Dashed": self.btn_dashed_crosshair.setChecked(True)
-        else: self.btn_dotted_crosshair.setChecked(True)
+        self.style_selector_crosshair.set_style_ui(self.state.crosshair_line_style)
         
         self.refresh_circle_tabs()
         if self.hud:
