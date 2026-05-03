@@ -18,6 +18,10 @@ Check here for the latest builds: https://github.com/udayd/StellAlign/releases
 5.  **Advanced Camera Controls:** Real-time Frame Averaging (Noise reduction), Software Gamma, Digital Zoom/Pan, and Arbitrary Rotation.
 6.  **Accessibility First:** Native support for UI scaling (up to 200%), Color-Blind safe palettes, high-contrast text overrides, dashed/dotted line styles, and a deep red Night Vision Mode to preserve dark adaptation.
 
+<img width="1827" height="1032" alt="Edge Detection" title="Edge Detection" src="https://github.com/user-attachments/assets/4c409bad-f9d2-43ac-826e-165b55c7958b" />
+
+<img width="2159" height="1041" alt="Masking with Assisted Mode" title="Masking with Assisted Mode" src="https://github.com/user-attachments/assets/be73252f-871e-4729-97ed-75fd5b325e3c" />
+
 ## Important Notes
 
 *   When using an astronomy camera, it will need a lens in order to focus. You can use a relatively inexpensive one ($22 on 2025-05-03) like a [ZWO 150-degree Replacement Lens](https://optcorp.com/products/zwo-150-degree-replacement-lens) if it's threads fit your camera (or find one on Amazon). The advantage of this over a regular USB camera is that camera will fit your focuser properly, though you won't have the ability to autofocus.
@@ -37,6 +41,7 @@ Check here for the latest builds: https://github.com/udayd/StellAlign/releases
 2. Install the requirements:
    `pip install -r requirements.txt`
 3. Run the application:
+
    `python main.py`
 
 ## Packaging to an Executable (.exe)
