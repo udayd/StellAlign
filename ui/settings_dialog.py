@@ -47,8 +47,15 @@ class GlobalSettingsDialog(QDialog):
         self.zwo_path_layout.addWidget(self.input_zwo_path)
         self.zwo_path_layout.addWidget(self.btn_browse_zwo)
         
+        self.combo_fps = QComboBox()
+        self.combo_fps.addItems(["15 FPS", "30 FPS", "60 FPS", "Uncapped"])
+        fps_map = {15: "15 FPS", 30: "30 FPS", 60: "60 FPS", 0: "Uncapped"}
+        self.combo_fps.setCurrentText(fps_map.get(self.state.fps_limit, "Uncapped"))
+        self.combo_fps.currentTextChanged.connect(self.on_fps_changed)
+        
         hw_layout.addRow("Device:", self.combo_camera)
         hw_layout.addRow("Resolution:", self.combo_resolution)
+        hw_layout.addRow("Max Framerate:", self.combo_fps)
         hw_layout.addRow("", self.chk_use_zwo)
         hw_layout.addRow("ZWO SDK Path:", self.zwo_path_layout)
         self.tabs.addTab(tab_hw, "Hardware")
@@ -89,12 +96,6 @@ class GlobalSettingsDialog(QDialog):
         self.chk_remember_hw.setChecked(self.state.remember_hardware)
         self.chk_remember_hw.toggled.connect(self.on_remember_hw_toggled)
         
-        self.combo_fps = QComboBox()
-        self.combo_fps.addItems(["15 FPS", "30 FPS", "60 FPS", "Uncapped"])
-        fps_map = {15: "15 FPS", 30: "30 FPS", 60: "60 FPS", 0: "Uncapped"}
-        self.combo_fps.setCurrentText(fps_map.get(self.state.fps_limit, "Uncapped"))
-        self.combo_fps.currentTextChanged.connect(self.on_fps_changed)
-        
         self.combo_screenshot = QComboBox()
         self.combo_screenshot.addItems([".png", ".jpg", ".tiff"])
         self.combo_screenshot.setCurrentText(self.state.screenshot_format)
@@ -112,7 +113,6 @@ class GlobalSettingsDialog(QDialog):
         beh_layout.addRow("", self.chk_remember_hw)
         beh_layout.addRow("", self.chk_watermark)
         beh_layout.addRow("", self.chk_updates)
-        beh_layout.addRow("Max Framerate:", self.combo_fps)
         beh_layout.addRow("Screenshot Format:", self.combo_screenshot)
         self.tabs.addTab(tab_beh, "Behaviors")
         

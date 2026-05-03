@@ -67,11 +67,26 @@ class CameraHUD(QWidget):
         
         self.slider_brightness = QSlider(Qt.Orientation.Horizontal); self.slider_brightness.setRange(0, 255); self.slider_brightness.setValue(self.state.brightness); self.slider_brightness.valueChanged.connect(self.on_brightness_changed)
         self.slider_contrast = QSlider(Qt.Orientation.Horizontal); self.slider_contrast.setRange(0, 255); self.slider_contrast.setValue(self.state.contrast); self.slider_contrast.valueChanged.connect(self.on_contrast_changed)
+        self.slider_saturation = QSlider(Qt.Orientation.Horizontal); self.slider_saturation.setRange(0, 255); self.slider_saturation.setValue(self.state.saturation); self.slider_saturation.valueChanged.connect(self.on_saturation_changed)
         self.slider_gamma = QSlider(Qt.Orientation.Horizontal); self.slider_gamma.setRange(10, 300); self.slider_gamma.setValue(self.state.gamma); self.slider_gamma.valueChanged.connect(self.on_gamma_changed)
         self.slider_exposure = QSlider(Qt.Orientation.Horizontal); self.slider_exposure.setRange(-15, 0); self.slider_exposure.setValue(self.state.exposure); self.slider_exposure.valueChanged.connect(self.on_exposure_changed)
         self.slider_gain = QSlider(Qt.Orientation.Horizontal); self.slider_gain.setRange(0, 255); self.slider_gain.setValue(self.state.gain); self.slider_gain.valueChanged.connect(self.on_gain_changed)
         self.slider_noise = QSlider(Qt.Orientation.Horizontal); self.slider_noise.setRange(1, 10); self.slider_noise.setValue(self.state.frame_averaging); self.slider_noise.valueChanged.connect(self.on_frame_averaging_changed)
         self.slider_focus = QSlider(Qt.Orientation.Horizontal); self.slider_focus.setRange(0, 255); self.slider_focus.setValue(self.state.focus); self.slider_focus.valueChanged.connect(self.on_focus_changed)
+        
+        self.btn_auto_exp = QPushButton("A")
+        self.btn_auto_exp.setCheckable(True)
+        self.btn_auto_exp.setChecked(self.state.auto_exposure)
+        self.btn_auto_exp.setFixedSize(24, 24)
+        self.btn_auto_exp.setStyleSheet("QPushButton { border-radius: 12px; } QPushButton:checked { background-color: #2e7d32; font-weight: bold; color: white; border-radius: 12px; }")
+        self.btn_auto_exp.toggled.connect(self.on_auto_exp_toggled)
+        
+        self.btn_auto_gain = QPushButton("A")
+        self.btn_auto_gain.setCheckable(True)
+        self.btn_auto_gain.setChecked(self.state.auto_gain)
+        self.btn_auto_gain.setFixedSize(24, 24)
+        self.btn_auto_gain.setStyleSheet("QPushButton { border-radius: 12px; } QPushButton:checked { background-color: #2e7d32; font-weight: bold; color: white; border-radius: 12px; }")
+        self.btn_auto_gain.toggled.connect(self.on_auto_gain_toggled)
         
         self.btn_auto_focus = QPushButton("A")
         self.btn_auto_focus.setCheckable(True)
@@ -80,13 +95,19 @@ class CameraHUD(QWidget):
         self.btn_auto_focus.setStyleSheet("QPushButton { border-radius: 12px; } QPushButton:checked { background-color: #2e7d32; font-weight: bold; color: white; border-radius: 12px; }")
         self.btn_auto_focus.toggled.connect(self.on_auto_focus_toggled)
         
-        exp_layout.addRow("Brightness:", self._create_slider_row(self.slider_brightness, 'minus', 'plus', True))
-        exp_layout.addRow("Contrast:", self._create_slider_row(self.slider_contrast, 'minus', 'plus', True))
+        exp_layout.addRow("Exposure:", self._create_slider_row(self.slider_exposure, 'minus', 'plus', True, self.btn_auto_exp))
+        exp_layout.addRow("Gain:", self._create_slider_row(self.slider_gain, 'minus', 'plus', True, self.btn_auto_gain))
         exp_layout.addRow("Gamma:", self._create_slider_row(self.slider_gamma, 'minus', 'plus', True))
-        exp_layout.addRow("Exposure:", self._create_slider_row(self.slider_exposure, 'minus', 'plus', True))
-        exp_layout.addRow("Gain:", self._create_slider_row(self.slider_gain, 'minus', 'plus', True))
         exp_layout.addRow("Focus:", self._create_slider_row(self.slider_focus, 'minus', 'plus', True, self.btn_auto_focus))
+        exp_layout.addRow("Contrast:", self._create_slider_row(self.slider_contrast, 'minus', 'plus', True))
+        exp_layout.addRow("Brightness:", self._create_slider_row(self.slider_brightness, 'minus', 'plus', True))
+        exp_layout.addRow("Saturation:", self._create_slider_row(self.slider_saturation, 'minus', 'plus', True))
         exp_layout.addRow("Noise Red.:", self._create_slider_row(self.slider_noise, 'minus', 'plus', True))
+        
+        btn_reset_defaults = QPushButton("Reset Defaults")
+        btn_reset_defaults.clicked.connect(self.reset_exposure_defaults)
+        exp_layout.addRow("", btn_reset_defaults)
+        
         self.stack.addWidget(tab_exp)
         
         # Image Tab
@@ -162,6 +183,7 @@ class CameraHUD(QWidget):
         btn_dec = QPushButton()
         btn_dec.setIcon(QIcon(f'assets/icons/{dec_icon}.svg'))
         btn_dec.setFixedSize(24, 24)
+        btn_dec.setAutoRepeat(True)
         btn_dec.clicked.connect(lambda checked, s=slider, st=-1: s.setValue(s.value() + st))
         row.addWidget(btn_dec)
         
@@ -170,6 +192,7 @@ class CameraHUD(QWidget):
         btn_inc = QPushButton()
         btn_inc.setIcon(QIcon(f'assets/icons/{inc_icon}.svg'))
         btn_inc.setFixedSize(24, 24)
+        btn_inc.setAutoRepeat(True)
         btn_inc.clicked.connect(lambda checked, s=slider, st=1: s.setValue(s.value() + st))
         row.addWidget(btn_inc)
         
@@ -206,8 +229,11 @@ class CameraHUD(QWidget):
     def sync_ui_to_state(self):
         self.slider_brightness.setValue(self.state.brightness)
         self.slider_contrast.setValue(self.state.contrast)
+        self.slider_saturation.setValue(self.state.saturation)
         self.slider_gamma.setValue(self.state.gamma)
+        self.btn_auto_exp.setChecked(self.state.auto_exposure)
         self.slider_exposure.setValue(self.state.exposure)
+        self.btn_auto_gain.setChecked(self.state.auto_gain)
         self.slider_gain.setValue(self.state.gain)
         self.btn_auto_focus.setChecked(self.state.auto_focus)
         self.slider_focus.setValue(self.state.focus)
@@ -226,8 +252,11 @@ class CameraHUD(QWidget):
 
     def on_brightness_changed(self, v): self.state.brightness = v
     def on_contrast_changed(self, v): self.state.contrast = v
+    def on_saturation_changed(self, v): self.state.saturation = v
     def on_gamma_changed(self, v): self.state.gamma = v
+    def on_auto_exp_toggled(self, c): self.state.auto_exposure = c
     def on_exposure_changed(self, v): self.state.exposure = v
+    def on_auto_gain_toggled(self, c): self.state.auto_gain = c
     def on_gain_changed(self, v): self.state.gain = v
     def on_auto_focus_toggled(self, c): self.state.auto_focus = c
     def on_focus_changed(self, v): self.state.focus = v
@@ -244,3 +273,16 @@ class CameraHUD(QWidget):
     def on_pan_y_changed(self, v): self.state.pan_y = v
     def on_edge_thresh_changed(self, v): self.state.edge_threshold = v
     def on_edge_thick_changed(self, v): self.state.edge_thickness = v
+
+    def reset_exposure_defaults(self):
+        self.btn_auto_exp.setChecked(False)
+        self.slider_exposure.setValue(-5)
+        self.btn_auto_gain.setChecked(False)
+        self.slider_gain.setValue(128)
+        self.slider_gamma.setValue(100)
+        self.btn_auto_focus.setChecked(True)
+        self.slider_focus.setValue(0)
+        self.slider_contrast.setValue(128)
+        self.slider_brightness.setValue(128)
+        self.slider_saturation.setValue(128)
+        self.slider_noise.setValue(1)

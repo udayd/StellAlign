@@ -167,6 +167,7 @@ class ControlPanel(QWidget):
         btn_dec = QPushButton()
         btn_dec.setIcon(QIcon(f'assets/icons/{dec_icon}.svg'))
         btn_dec.setFixedSize(24, 24)
+        btn_dec.setAutoRepeat(True)
         btn_dec.clicked.connect(lambda checked, s=slider, st=-1: s.setValue(s.value() + st))
         row.addWidget(btn_dec)
         
@@ -175,6 +176,7 @@ class ControlPanel(QWidget):
         btn_inc = QPushButton()
         btn_inc.setIcon(QIcon(f'assets/icons/{inc_icon}.svg'))
         btn_inc.setFixedSize(24, 24)
+        btn_inc.setAutoRepeat(True)
         btn_inc.clicked.connect(lambda checked, s=slider, st=1: s.setValue(s.value() + st))
         row.addWidget(btn_inc)
         

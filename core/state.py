@@ -44,8 +44,11 @@ class CollimationState:
     frame_averaging: int = 1
     brightness: int = 128
     contrast: int = 128
+    saturation: int = 128
     exposure: int = -5
+    auto_exposure: bool = False
     gain: int = 128
+    auto_gain: bool = False
     auto_focus: bool = True
     focus: int = 0
     night_mode: bool = False
