@@ -36,6 +36,10 @@ class CollimationState:
     zoom: int = 100
     pan_x: int = 0
     pan_y: int = 0
+    edge_threshold: int = 50
+    edge_thickness: int = 1
+    use_zwo_camera: bool = False
+    zwo_sdk_path: str = ""
     gamma: int = 100
     frame_averaging: int = 1
     brightness: int = 128

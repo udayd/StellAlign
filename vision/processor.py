@@ -101,9 +101,10 @@ class FrameProcessor:
             processed_frame = cv2.flip(processed_frame, 0)
             
         # 1.8. Digital Zoom & Pan
+        h, w = processed_frame.shape[:2]
+        scale = self.state.zoom / 100.0
+        
         if self.state.zoom > 100:
-            h, w = processed_frame.shape[:2]
-            scale = self.state.zoom / 100.0
             half_w = int(w / (2 * scale))
             half_h = int(h / (2 * scale))
             
@@ -116,25 +117,38 @@ class FrameProcessor:
             
             cropped = processed_frame[cy - half_h : cy + half_h, cx - half_w : cx + half_w]
             processed_frame = cv2.resize(cropped, (w, h), interpolation=cv2.INTER_LINEAR)
+        else:
+            cx = w // 2
+            cy = h // 2
+            half_w = w // 2
+            half_h = h // 2
             
         # 2. Apply Edge Detection
         if self.state.edge_detection:
             gray = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2GRAY)
             # Detect edges using Canny
-            edges = cv2.Canny(gray, 50, 150)
+            edges = cv2.Canny(gray, self.state.edge_threshold, self.state.edge_threshold * 3)
+            if self.state.edge_thickness > 1:
+                kernel = np.ones((self.state.edge_thickness, self.state.edge_thickness), np.uint8)
+                edges = cv2.dilate(edges, kernel, iterations=1)
             # Convert back to BGR to allow colored overlays
             processed_frame = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
 
         h, w = processed_frame.shape[:2]
         center_x, center_y = w // 2, h // 2
-
+        
+        # Function to map original unscaled coordinates to current view
+        def map_pt(x, y):
+            return int((x - cx + half_w) * scale), int((y - cy + half_h) * scale)
+            
         if self.state.crosshair_visible:
             # Parse the hex color into a BGR tuple for OpenCV
             h_cross = self.state.crosshair_color.lstrip('#')
             bgr_cross_color = tuple(int(h_cross[i:i+2], 16) for i in (4, 2, 0))
             
-            cross_x = center_x + self.state.crosshair_offset_x
-            cross_y = center_y + self.state.crosshair_offset_y
+            orig_cross_x = center_x + self.state.crosshair_offset_x
+            orig_cross_y = center_y + self.state.crosshair_offset_y
+            cross_x, cross_y = map_pt(orig_cross_x, orig_cross_y)
             
             L = int(np.hypot(w, h))
             theta = np.radians(self.state.crosshair_rotation)
@@ -148,16 +162,29 @@ class FrameProcessor:
             self._draw_styled_line(processed_frame, pt1, pt2, bgr_cross_color, self.state.crosshair_thickness, self.state.crosshair_line_style)
             self._draw_styled_line(processed_frame, pt3, pt4, bgr_cross_color, self.state.crosshair_thickness, self.state.crosshair_line_style)
 
+        # Pre-calculate scaled circles
+        scaled_circles = []
         for circle in self.state.circles:
             if not circle.visible:
                 continue
-                
+            orig_x = center_x + circle.offset_x
+            orig_y = center_y + circle.offset_y
+            c_x, c_y = map_pt(orig_x, orig_y)
+            c_r = int(circle.radius * scale)
+            scaled_circles.append({
+                'state': circle,
+                'x': c_x, 'y': c_y, 'r': c_r
+            })
+
+        for sc in scaled_circles:
+            circle = sc['state']
             # Parse the hex color
             h_color = circle.color.lstrip('#')
             bgr_color = tuple(int(h_color[i:i+2], 16) for i in (4, 2, 0))
             
-            circle_x = center_x + circle.offset_x
-            circle_y = center_y + circle.offset_y
+            circle_x = sc['x']
+            circle_y = sc['y']
+            circle_r = sc['r']
             
             # Apply Masking
             if circle.mask_mode != 'none':
@@ -168,17 +195,17 @@ class FrameProcessor:
                 self._mask_buffer.fill(0)
                 
                 darkened_frame = cv2.addWeighted(processed_frame, 1.0 - opacity, self._solid_buffer, opacity * 0.3, 0)
-                cv2.circle(self._mask_buffer, (circle_x, circle_y), circle.radius, (255, 255, 255), -1)
+                cv2.circle(self._mask_buffer, (circle_x, circle_y), circle_r, (255, 255, 255), -1)
                 
                 if circle.mask_mode == 'inside':
                     processed_frame = np.where(self._mask_buffer == 255, darkened_frame, processed_frame)
                 elif circle.mask_mode == 'outside':
                     processed_frame = np.where(self._mask_buffer == 0, darkened_frame, processed_frame)
                     
-            self._draw_styled_circle(processed_frame, (circle_x, circle_y), circle.radius, bgr_color, circle.thickness, circle.line_style)
+            self._draw_styled_circle(processed_frame, (circle_x, circle_y), circle_r, bgr_color, circle.thickness, circle.line_style)
             
             if circle.center_mark_visible:
-                mark_size = 10
+                mark_size = max(5, int(10 * scale))
                 thickness = max(1, circle.thickness - 1)
                 cv2.line(processed_frame, (circle_x - mark_size, circle_y), (circle_x + mark_size, circle_y), bgr_color, thickness)
                 cv2.line(processed_frame, (circle_x, circle_y - mark_size), (circle_x, circle_y + mark_size), bgr_color, thickness)

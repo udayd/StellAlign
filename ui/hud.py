@@ -109,11 +109,21 @@ class CameraHUD(QWidget):
         self.slider_zoom = QSlider(Qt.Orientation.Horizontal); self.slider_zoom.setRange(100, 500); self.slider_zoom.setValue(self.state.zoom); self.slider_zoom.valueChanged.connect(self.on_zoom_changed)
         self.slider_pan_x = QSlider(Qt.Orientation.Horizontal); self.slider_pan_x.setRange(-100, 100); self.slider_pan_x.setValue(self.state.pan_x); self.slider_pan_x.valueChanged.connect(self.on_pan_x_changed)
         self.slider_pan_y = QSlider(Qt.Orientation.Horizontal); self.slider_pan_y.setRange(-100, 100); self.slider_pan_y.setValue(self.state.pan_y); self.slider_pan_y.valueChanged.connect(self.on_pan_y_changed)
+        self.slider_edge_thresh = QSlider(Qt.Orientation.Horizontal); self.slider_edge_thresh.setRange(10, 255); self.slider_edge_thresh.setValue(self.state.edge_threshold); self.slider_edge_thresh.valueChanged.connect(self.on_edge_thresh_changed)
+        self.slider_edge_thick = QSlider(Qt.Orientation.Horizontal); self.slider_edge_thick.setRange(1, 10); self.slider_edge_thick.setValue(self.state.edge_thickness); self.slider_edge_thick.valueChanged.connect(self.on_edge_thick_changed)
+        
+        self.row_edge_thresh = self._create_slider_row(self.slider_edge_thresh, 'minus', 'plus', True)
+        self.row_edge_thick = self._create_slider_row(self.slider_edge_thick, 'minus', 'plus', True)
         
         img_layout.addRow(grid)
         img_layout.addRow("Zoom:", self._create_slider_row(self.slider_zoom, 'zoom-out', 'zoom-in', True))
         img_layout.addRow("Pan X:", self._create_slider_row(self.slider_pan_x, 'chevron-left', 'chevron-right', True))
         img_layout.addRow("Pan Y:", self._create_slider_row(self.slider_pan_y, 'chevron-up', 'chevron-down', True))
+        img_layout.addRow("Edge Thresh:", self.row_edge_thresh)
+        img_layout.addRow("Edge Thick:", self.row_edge_thick)
+        
+        self.row_edge_thresh.setEnabled(self.state.edge_detection)
+        self.row_edge_thick.setEnabled(self.state.edge_detection)
         
         btn_reset_view = QPushButton("Reset Zoom & Pan")
         btn_reset_view.clicked.connect(self.reset_zoom_pan)
@@ -209,6 +219,10 @@ class CameraHUD(QWidget):
         self.slider_zoom.setValue(self.state.zoom)
         self.slider_pan_x.setValue(self.state.pan_x)
         self.slider_pan_y.setValue(self.state.pan_y)
+        self.slider_edge_thresh.setValue(self.state.edge_threshold)
+        self.slider_edge_thick.setValue(self.state.edge_thickness)
+        self.row_edge_thresh.setEnabled(self.state.edge_detection)
+        self.row_edge_thick.setEnabled(self.state.edge_detection)
 
     def on_brightness_changed(self, v): self.state.brightness = v
     def on_contrast_changed(self, v): self.state.contrast = v
@@ -221,7 +235,12 @@ class CameraHUD(QWidget):
     def on_flip_h_toggled(self, c): self.state.flip_horizontal = c
     def on_flip_v_toggled(self, c): self.state.flip_vertical = c
     def on_monochrome_toggled(self, c): self.state.monochrome = c
-    def on_edge_toggled(self, c): self.state.edge_detection = c
+    def on_edge_toggled(self, c): 
+        self.state.edge_detection = c
+        self.row_edge_thresh.setEnabled(c)
+        self.row_edge_thick.setEnabled(c)
     def on_zoom_changed(self, v): self.state.zoom = v
     def on_pan_x_changed(self, v): self.state.pan_x = v
     def on_pan_y_changed(self, v): self.state.pan_y = v
+    def on_edge_thresh_changed(self, v): self.state.edge_threshold = v
+    def on_edge_thick_changed(self, v): self.state.edge_thickness = v
