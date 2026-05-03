@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
-                             QLabel, QComboBox, QTabWidget, QWidget, QFormLayout, QCheckBox)
+                             QLabel, QComboBox, QTabWidget, QWidget, QFormLayout, QCheckBox, QLineEdit, QFileDialog)
 from PyQt6.QtCore import Qt, QUrl
 from PyQt6.QtGui import QDesktopServices
 from core.state import CollimationState
@@ -21,8 +21,9 @@ class GlobalSettingsDialog(QDialog):
         hw_layout = QFormLayout(tab_hw)
         
         self.combo_camera = QComboBox()
-        self.combo_camera.addItems([f"Camera {i}" for i in range(5)])
-        self.combo_camera.setCurrentIndex(self.state.camera_index)
+        self._populate_cameras()
+        if self.state.camera_index < self.combo_camera.count():
+            self.combo_camera.setCurrentIndex(self.state.camera_index)
         self.combo_camera.currentIndexChanged.connect(self.on_camera_changed)
         
         self.combo_resolution = QComboBox()
@@ -30,9 +31,29 @@ class GlobalSettingsDialog(QDialog):
         self.combo_resolution.setCurrentText(f"{self.state.resolution_width}x{self.state.resolution_height}")
         self.combo_resolution.currentTextChanged.connect(self.on_resolution_changed)
         
+        self.chk_use_zwo = QCheckBox("Enable Native ZWO Camera Support")
+        self.chk_use_zwo.setChecked(self.state.use_zwo_camera)
+        self.chk_use_zwo.toggled.connect(self.on_use_zwo_toggled)
+
+        self.input_zwo_path = QLineEdit()
+        self.input_zwo_path.setText(self.state.zwo_sdk_path)
+        self.input_zwo_path.setPlaceholderText("Path to ASICamera2.dll or libASICamera2.so")
+        self.input_zwo_path.textChanged.connect(self.on_zwo_path_changed)
+        
+        self.btn_browse_zwo = QPushButton("Browse...")
+        self.btn_browse_zwo.clicked.connect(self.browse_zwo_sdk)
+        
+        self.zwo_path_layout = QHBoxLayout()
+        self.zwo_path_layout.addWidget(self.input_zwo_path)
+        self.zwo_path_layout.addWidget(self.btn_browse_zwo)
+        
         hw_layout.addRow("Device:", self.combo_camera)
         hw_layout.addRow("Resolution:", self.combo_resolution)
+        hw_layout.addRow("", self.chk_use_zwo)
+        hw_layout.addRow("ZWO SDK Path:", self.zwo_path_layout)
         self.tabs.addTab(tab_hw, "Hardware")
+        
+        self._update_zwo_visibility(self.state.use_zwo_camera)
         
         # --- Accessibility Tab ---
         tab_acc = QWidget()
@@ -129,6 +150,20 @@ class GlobalSettingsDialog(QDialog):
         w, h = map(int, text.split('x'))
         self.state.resolution_width = w
         self.state.resolution_height = h
+    def on_use_zwo_toggled(self, checked):
+        self.state.use_zwo_camera = checked
+        self._update_zwo_visibility(checked)
+
+    def _update_zwo_visibility(self, visible):
+        self.input_zwo_path.setVisible(visible)
+        self.btn_browse_zwo.setVisible(visible)
+        self.tabs.widget(0).layout().labelForField(self.zwo_path_layout).setVisible(visible)
+
+    def on_zwo_path_changed(self, text): self.state.zwo_sdk_path = text
+    def browse_zwo_sdk(self):
+        path, _ = QFileDialog.getOpenFileName(self, "Select ZWO SDK Library", "", "Shared Libraries (*.dll *.so);;All Files (*)")
+        if path:
+            self.input_zwo_path.setText(path)
     def on_scale_changed(self, text): 
         self.state.ui_scale = int(text.replace("%", ""))
         scaled_min_width = int(380 * (self.state.ui_scale / 100.0))
@@ -152,6 +187,22 @@ class GlobalSettingsDialog(QDialog):
     def check_for_updates(self):
         QDesktopServices.openUrl(QUrl("https://github.com/udayd/StellAlign/releases"))
 
+    def _populate_cameras(self):
+        self.combo_camera.clear()
+        try:
+            # Requires: pip install pygrabber
+            from pygrabber.dshow_graph import FilterGraph
+            graph = FilterGraph()
+            devices = graph.get_input_devices()
+            if devices:
+                self.combo_camera.addItems([f"{i}: {name}" for i, name in enumerate(devices)])
+                return
+        except ImportError:
+            pass
+            
+        # Fallback if pygrabber isn't installed or fails
+        self.combo_camera.addItems([f"Camera {i}" for i in range(5)])
+
     def _apply_live_settings(self):
         parent = self.parent()
         if parent and hasattr(parent, 'apply_accessibility_settings'):
@@ -160,13 +211,23 @@ class GlobalSettingsDialog(QDialog):
         apply_application_theme(self.state)
 
     def sync(self):
-        self.combo_camera.setCurrentIndex(self.state.camera_index)
+        self.combo_camera.blockSignals(True)
+        self._populate_cameras()
+        if self.state.camera_index < self.combo_camera.count():
+            self.combo_camera.setCurrentIndex(self.state.camera_index)
+        else:
+            self.combo_camera.setCurrentIndex(0)
+        self.combo_camera.blockSignals(False)
+        
         self.combo_resolution.setCurrentText(f"{self.state.resolution_width}x{self.state.resolution_height}")
         self.combo_scale.setCurrentText(f"{self.state.ui_scale}%")
         self.chk_color_blind.setChecked(self.state.color_blind_palette)
         self.chk_high_contrast.setChecked(self.state.high_contrast_text)
         self.chk_tooltips.setChecked(self.state.show_tooltips)
         self.chk_remember_hw.setChecked(self.state.remember_hardware)
+        self.chk_use_zwo.setChecked(self.state.use_zwo_camera)
+        self.input_zwo_path.setText(self.state.zwo_sdk_path)
+        self._update_zwo_visibility(self.state.use_zwo_camera)
         fps_map = {15: "15 FPS", 30: "30 FPS", 60: "60 FPS", 0: "Uncapped"}
         self.combo_fps.setCurrentText(fps_map.get(self.state.fps_limit, "Uncapped"))
         self.combo_screenshot.setCurrentText(self.state.screenshot_format)
