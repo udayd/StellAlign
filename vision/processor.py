@@ -100,13 +100,6 @@ class FrameProcessor:
         elif self.state.flip_vertical:
             processed_frame = cv2.flip(processed_frame, 0)
             
-        # 1.5. Apply Rotation
-        if self.state.rotation_angle != 0:
-            h, w = processed_frame.shape[:2]
-            center = (w // 2, h // 2)
-            M = cv2.getRotationMatrix2D(center, self.state.rotation_angle, 1.0)
-            processed_frame = cv2.warpAffine(processed_frame, M, (w, h))
-            
         # 1.8. Digital Zoom & Pan
         if self.state.zoom > 100:
             h, w = processed_frame.shape[:2]
@@ -142,8 +135,18 @@ class FrameProcessor:
             
             cross_x = center_x + self.state.crosshair_offset_x
             cross_y = center_y + self.state.crosshair_offset_y
-            self._draw_styled_line(processed_frame, (cross_x, 0), (cross_x, h), bgr_cross_color, self.state.crosshair_thickness, self.state.crosshair_line_style)
-            self._draw_styled_line(processed_frame, (0, cross_y), (w, cross_y), bgr_cross_color, self.state.crosshair_thickness, self.state.crosshair_line_style)
+            
+            L = int(np.hypot(w, h))
+            theta = np.radians(self.state.crosshair_rotation)
+            sin_t = np.sin(theta)
+            cos_t = np.cos(theta)
+            
+            pt1 = (int(cross_x - L * sin_t), int(cross_y - L * cos_t))
+            pt2 = (int(cross_x + L * sin_t), int(cross_y + L * cos_t))
+            pt3 = (int(cross_x - L * cos_t), int(cross_y + L * sin_t))
+            pt4 = (int(cross_x + L * cos_t), int(cross_y - L * sin_t))
+            self._draw_styled_line(processed_frame, pt1, pt2, bgr_cross_color, self.state.crosshair_thickness, self.state.crosshair_line_style)
+            self._draw_styled_line(processed_frame, pt3, pt4, bgr_cross_color, self.state.crosshair_thickness, self.state.crosshair_line_style)
 
         for circle in self.state.circles:
             if not circle.visible:

@@ -106,13 +106,11 @@ class CameraHUD(QWidget):
         col2 = QVBoxLayout(); col2.addWidget(self.chk_flip_v); col2.addWidget(self.chk_edge)
         grid.addLayout(col1); grid.addLayout(col2)
         
-        self.slider_rotation = QSlider(Qt.Orientation.Horizontal); self.slider_rotation.setRange(-180, 180); self.slider_rotation.setValue(self.state.rotation_angle); self.slider_rotation.valueChanged.connect(self.on_rotation_changed)
         self.slider_zoom = QSlider(Qt.Orientation.Horizontal); self.slider_zoom.setRange(100, 500); self.slider_zoom.setValue(self.state.zoom); self.slider_zoom.valueChanged.connect(self.on_zoom_changed)
         self.slider_pan_x = QSlider(Qt.Orientation.Horizontal); self.slider_pan_x.setRange(-100, 100); self.slider_pan_x.setValue(self.state.pan_x); self.slider_pan_x.valueChanged.connect(self.on_pan_x_changed)
         self.slider_pan_y = QSlider(Qt.Orientation.Horizontal); self.slider_pan_y.setRange(-100, 100); self.slider_pan_y.setValue(self.state.pan_y); self.slider_pan_y.valueChanged.connect(self.on_pan_y_changed)
         
         img_layout.addRow(grid)
-        img_layout.addRow("Rotation:", self._create_slider_row(self.slider_rotation, 'undo', 'redo', True))
         img_layout.addRow("Zoom:", self._create_slider_row(self.slider_zoom, 'zoom-out', 'zoom-in', True))
         img_layout.addRow("Pan X:", self._create_slider_row(self.slider_pan_x, 'chevron-left', 'chevron-right', True))
         img_layout.addRow("Pan Y:", self._create_slider_row(self.slider_pan_y, 'chevron-up', 'chevron-down', True))
@@ -208,7 +206,6 @@ class CameraHUD(QWidget):
         self.chk_flip_v.setChecked(self.state.flip_vertical)
         self.chk_mono.setChecked(self.state.monochrome)
         self.chk_edge.setChecked(self.state.edge_detection)
-        self.slider_rotation.setValue(self.state.rotation_angle)
         self.slider_zoom.setValue(self.state.zoom)
         self.slider_pan_x.setValue(self.state.pan_x)
         self.slider_pan_y.setValue(self.state.pan_y)
@@ -225,7 +222,6 @@ class CameraHUD(QWidget):
     def on_flip_v_toggled(self, c): self.state.flip_vertical = c
     def on_monochrome_toggled(self, c): self.state.monochrome = c
     def on_edge_toggled(self, c): self.state.edge_detection = c
-    def on_rotation_changed(self, v): self.state.rotation_angle = v
     def on_zoom_changed(self, v): self.state.zoom = v
     def on_pan_x_changed(self, v): self.state.pan_x = v
     def on_pan_y_changed(self, v): self.state.pan_y = v
