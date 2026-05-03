@@ -22,6 +22,7 @@ class CollimationState:
     crosshair_offset_x: int = 0
     crosshair_offset_y: int = 0
     crosshair_thickness: int = 1
+    crosshair_rotation: int = 0
     crosshair_color: str = "#39FF14" # Neon Green default
     crosshair_line_style: str = "Solid"
     circles: list[CircleState] = field(default_factory=lambda: [CircleState()])
@@ -32,7 +33,6 @@ class CollimationState:
     flip_vertical: bool = False
     monochrome: bool = False
     edge_detection: bool = False
-    rotation_angle: int = 0
     zoom: int = 100
     pan_x: int = 0
     pan_y: int = 0

@@ -109,6 +109,11 @@ class ControlPanel(QWidget):
         self.slider_crosshair_thickness.setValue(self.state.crosshair_thickness)
         self.slider_crosshair_thickness.valueChanged.connect(self.on_crosshair_thickness_changed)
         
+        self.slider_crosshair_rotation = QSlider(Qt.Orientation.Horizontal)
+        self.slider_crosshair_rotation.setRange(-180, 180)
+        self.slider_crosshair_rotation.setValue(self.state.crosshair_rotation)
+        self.slider_crosshair_rotation.valueChanged.connect(self.on_crosshair_rotation_changed)
+        
         self.combo_crosshair_style = QComboBox()
         self.combo_crosshair_style.addItems(["Solid", "Dashed", "Dotted"])
         self.combo_crosshair_style.setCurrentText(self.state.crosshair_line_style)
@@ -119,6 +124,7 @@ class ControlPanel(QWidget):
         crosshair_layout.addRow("Offset X:", self._create_slider_row(self.slider_crosshair_offset_x, 'chevron-left', 'chevron-right'))
         crosshair_layout.addRow("Offset Y:", self._create_slider_row(self.slider_crosshair_offset_y, 'chevron-up', 'chevron-down'))
         crosshair_layout.addRow("Thickness:", self._create_slider_row(self.slider_crosshair_thickness, 'minus', 'plus'))
+        crosshair_layout.addRow("Rotation:", self._create_slider_row(self.slider_crosshair_rotation, 'undo', 'redo', True))
         crosshair_layout.addRow("Style:", self.combo_crosshair_style)
         crosshair_layout.addRow("Color:", self.palette_crosshair_color)
         
@@ -293,10 +299,12 @@ class ControlPanel(QWidget):
     def on_crosshair_reset(self):
         self.slider_crosshair_offset_x.setValue(0)
         self.slider_crosshair_offset_y.setValue(0)
+        self.slider_crosshair_rotation.setValue(0)
         
     def on_crosshair_offset_x_changed(self, value): self.state.crosshair_offset_x = value
     def on_crosshair_offset_y_changed(self, value): self.state.crosshair_offset_y = value
     def on_crosshair_thickness_changed(self, value): self.state.crosshair_thickness = value
+    def on_crosshair_rotation_changed(self, value): self.state.crosshair_rotation = value
     def on_crosshair_color_changed(self, color_hex): self.state.crosshair_color = color_hex
     def on_crosshair_style_changed(self, text): self.state.crosshair_line_style = text
 
@@ -317,6 +325,7 @@ class ControlPanel(QWidget):
         self.slider_crosshair_offset_x.setValue(self.state.crosshair_offset_x)
         self.slider_crosshair_offset_y.setValue(self.state.crosshair_offset_y)
         self.slider_crosshair_thickness.setValue(self.state.crosshair_thickness)
+        self.slider_crosshair_rotation.setValue(self.state.crosshair_rotation)
         self.palette_crosshair_color.set_color(self.state.crosshair_color)
         self.combo_crosshair_style.setCurrentText(self.state.crosshair_line_style)
         
