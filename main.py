@@ -1,4 +1,5 @@
 import sys
+import os
 import qdarktheme
 from PyQt6.QtWidgets import QApplication, QPushButton, QCheckBox, QComboBox, QSlider, QTabBar
 from PyQt6.QtCore import QObject, QEvent, Qt
@@ -29,6 +30,12 @@ class GlobalAppFilter(QObject):
         return super().eventFilter(obj, event)
 
 def main():
+    # Fix pathing for PyInstaller executable
+    if getattr(sys, 'frozen', False):
+        os.chdir(sys._MEIPASS)
+    else:
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
     # Initialize our document folders first thing
     WorkspaceManager.init_workspace()
 
